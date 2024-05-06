@@ -1,79 +1,61 @@
 import tkinter as tk
+from tkinter import messagebox
 
-def validate_credit_card(card_number: str) -> bool:
-    """This function validates a credit card number."""
-    # 1. Change datatype to list[int]
-    card_number = [int(num) for num in card_number]
+def checkSecondDigits(num):
+    length = len(num)
+    total = 0
+    for i in range(length - 2, -1, -2):
+        number = int(num[i])
+        number *= 2
+        if number > 9:
+            strNumber = str(number)
+            number = int(strNumber[0]) + int(strNumber[1])
+        total += number
+    return total
 
-    # 2. Remove the last digit:
-    checkDigit = card_number.pop(-1)
+def odd_digits(num):
+    length = len(num)
+    sumOdd = 0
+    for i in range(length - 1, -1, -2):
+        sumOdd += int(num[i])
+    return sumOdd
 
-    # 3. Reverse the remaining digits:
-    card_number.reverse()
+def c_length(num):
+    length = len(num)
+    if length >= 13 and length <= 16:
+        if num[0] == "4" or num[0] == "5" or num[0] == "6" or (num[0] == "3" and num[1] == "7"):
+            return True
+    return False
 
-    # 4. Double digits at even indices
-    card_number = [num * 2 if idx % 2 == 0
-                   else num for idx, num in enumerate(card_number)]
+def process_credit_card():
+    cc = entry_cc_number.get()
+    even = checkSecondDigits(cc)
+    odd = odd_digits(cc)
+    c_len = c_length(cc)
+    tot = even + odd
 
-    # 5. Subtract 9 at even indices if digit is over 9
-    # (or you can add the digits)
-    card_number = [num - 9 if idx % 2 == 0 and num > 9
-                   else num for idx, num in enumerate(card_number)]
-
-    # 6. Add the checkDigit back to the list:
-    card_number.append(checkDigit)
-
-    # 7. Sum all digits:
-    checkSum = sum(card_number)
-
-    # 8. If checkSum is divisible by 10, it is valid.
-    return checkSum % 10 == 0
-
-# Block for user input
-def get_credit_card_number() -> str:
-    """This function prompts the user to input a credit card number."""
-    while True:
-        card_number = entry.get()
-        # Remove any spaces or dashes from the input
-        card_number = card_number.replace(" ", "").replace("-", "")
-        if card_number.isdigit() and len(card_number) == 16:
-            return card_number
-        else:
-            result_label.config(text="Invalid input! Please enter a 16-digit credit card number.")
-
-# Function to handle validation and display result
-def validate_and_display():
-    card_number = get_credit_card_number()
-    if validate_credit_card(card_number):
-        result_label.config(text="Valid.")
+    if c_len and tot % 10 == 0:
+        result_label.config(text="Valid", fg="green")
     else:
-        result_label.config(text="Invalid.")
+        result_label.config(text="Invalid", fg="red")
 
-# Function to exit the application
-def exit_application():
-    window.destroy()
+# Create tkinter window
+root = tk.Tk()
+root.title("Credit Card Validator")
 
-# Create a tkinter window
-window = tk.Tk()
-window.title("Credit Card Validator")
+# Input credit card number
+label_cc_number = tk.Label(root, text="Enter credit card number:")
+label_cc_number.pack()
+entry_cc_number = tk.Entry(root)
+entry_cc_number.pack()
 
-# Set background color to dark
-window.configure(bg='#333')
-
-# Set window size
-window.geometry("300x140")
-
-# Create input entry
-entry = tk.Entry(window, width=30)
-entry.pack(pady=10)
-
-# Create validate button
-validate_button = tk.Button(window, text="Validate", command=validate_and_display, bg='#666', fg='#fff')
+# Button to validate credit card
+validate_button = tk.Button(root, text="Validate", command=process_credit_card)
 validate_button.pack()
 
-# Create label to display result
-result_label = tk.Label(window, text="", bg='#333', fg='#fff')
-result_label.pack(pady=10)
+# Display validation result
+result_label = tk.Label(root, text="", fg="black")
+result_label.pack()
 
-# Run the tkinter event loop
-window.mainloop()
+root.mainloop()
+
